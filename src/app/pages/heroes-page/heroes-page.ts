@@ -12,6 +12,10 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 })
 export class HeroesPage implements OnInit {
   heroes: Hero[] = [];
+  total = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [5, 10, 25, 100];
 
   constructor(private heroService: HeroService) {}
 
@@ -20,6 +24,17 @@ export class HeroesPage implements OnInit {
   }
 
   getHeroes(): void {
-    this.heroService.getHeroes().subscribe((heroes) => (this.heroes = heroes));
+    this.heroService
+      .getHeroesWithPagination(this.pageIndex + 1, this.pageSize)
+      .subscribe((res) => {
+        this.heroes = res.body || [];
+        this.total = Number(res.headers.get('X-Total-Count'));
+      });
+  }
+
+  onPageChange(event: any) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.getHeroes();
   }
 }

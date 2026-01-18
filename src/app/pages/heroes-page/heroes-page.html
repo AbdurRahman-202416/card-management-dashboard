@@ -1,17 +1,18 @@
 <div class="heroes-page">
   <h2>All Heroes</h2>
-  <div class="heroes-list">
+  <div class="heroes-grid">
     @for (hero of heroes; track hero.id) {
-    <a [routerLink]="['/detail', hero.id]" class="hero-item">
+    <a [routerLink]="['/detail', hero.id]" class="hero-card">
       <span class="hero-badge">{{ hero.id }}</span>
       <span class="hero-name">{{ hero.name }}</span>
     </a>
     }
   </div>
   <mat-paginator
-    [length]="100"
-    [pageSize]="10"
-    [pageSizeOptions]="[5, 10, 25, 100]"
+    [length]="total"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="onPageChange($event)"
     aria-label="Select page"
   >
   </mat-paginator>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Hero } from '../models/hero.model';
 import { HttpResponse } from '@angular/common/http';
 
@@ -12,12 +12,12 @@ export class HeroService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔹 EXISTING (unchanged)
+ 
   getHeroes(): Observable<Hero[]> {
     return this.http.get<Hero[]>(this.apiUrl);
   }
 
-  getHero(id: number): Observable<Hero> {
+  getHero(id: string | number): Observable<Hero> {
     return this.http.get<Hero>(`${this.apiUrl}/${id}`);
   }
 
@@ -32,5 +32,12 @@ export class HeroService {
       `${this.apiUrl}?_page=${page}&_limit=${limit}`,
       { observe: 'response' } // for total count
     );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    if (!term.trim()) {
+      return of([]);
+    }
+    return this.http.get<Hero[]>(`${this.apiUrl}/?name_like=${term}`);
   }
 }

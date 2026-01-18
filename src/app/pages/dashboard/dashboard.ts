@@ -1,45 +1,38 @@
-// import { MatPaginatorModule } from '@angular/material/paginator';
-// import { Component, OnInit } from '@angular/core';
-// import { RouterLink } from '@angular/router';
-// import { HeroService } from '../../services/hero.service';
-// import { Hero } from '../../models/hero.model';
-
-// @Component({
-//   selector: 'app-dashboard',
-//   imports: [RouterLink, MatPaginatorModule],
-//   templateUrl: './dashboard.html',
-//   styleUrl: './dashboard.scss',
-// })
-// export class Dashboard implements OnInit {
-//   heroes: Hero[] = [];
-
-//   constructor(private heroService: HeroService) {}
-
-//   ngOnInit(): void {
-//     this.getHeroes();
-//   }
-
-//   getHeroes(): void {
-//     this.heroService.getHeroes().subscribe((heroes) => (this.heroes = heroes.slice(0, 5)));
-//   }
-// }
-
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { HeroService } from '../../services/hero.service';
 import { Hero } from '../../models/hero.model';
 import { RouterLink } from '@angular/router';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, MatPaginatorModule],
+  imports: [
+    RouterLink, 
+    MatPaginatorModule, 
+    MatAutocompleteModule, 
+    MatInputModule,
+    MatIconModule, 
+    ReactiveFormsModule,
+    AsyncPipe
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
   heroes: Hero[] = [];
+  
+  // Search
+  searchControl = new FormControl('');
+  filteredHeroes: Observable<Hero[]> | undefined;
 
   total = 0;
   pageSize = 5;
@@ -50,6 +43,16 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.loadHeroes();
+    
+    this.filteredHeroes = this.searchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((term) => {
+        if (!term || typeof term !== 'string') return [];
+        return this.heroService.searchHeroes(term);
+      })
+    );
   }
 
   calculatePageArray() {

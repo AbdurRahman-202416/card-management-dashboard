@@ -1,3 +1,5 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 nav a {
   padding: 10px 15px;
   text-decoration: none;
@@ -30,12 +32,24 @@ nav a.active {
   color: white;
 }
 
-footer {
-  text-align: center;
-  padding: 5px 0;
-  background-color: #f1f1f1;
-  color: #666;
- 
-  bottom: 0;
+/* Global Paginator Styles */
+.mat-mdc-paginator {
+  background: white;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex !important;
+  justify-content: center;
+  /* Center the paginator content */
+}
+
+.mat-mdc-paginator-outer-container {
   width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mat-mdc-paginator-container {
+  padding: 0 16px;
+  min-height: 48px;
 }

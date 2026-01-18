@@ -1,19 +1,42 @@
 <div class="dashboard">
-  <h2>Top Heroes</h2>
-  <div class="heroes-grid">
-    @for (hero of heroes; track hero.id) {
-    <a [routerLink]="['/detail', hero.id]" class="hero-card">
-      <h3>{{ hero.name }}</h3>
-    </a>
-    }
-  </div>
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <h2>Top Heroes Dashboard</h2>
+      
+      <mat-form-field class="search-full-width" appearance="outline">
+        <mat-label>Search Heroes</mat-label>
+        <input type="text"
+               placeholder="Ex. Magma"
+               matInput
+               [formControl]="searchControl"
+               [matAutocomplete]="auto">
+        <mat-icon matSuffix>search</mat-icon>
+        <mat-autocomplete #auto="matAutocomplete">
+          @for (option of filteredHeroes | async; track option.id) {
+            <mat-option [routerLink]="['/detail', option.id]" [value]="option.name">
+              {{option.name}}
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
 
-  <mat-paginator
-    [length]="total"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="itemPerPageCount"
-    aria-label="Select page"
-    (page)="onPageChange($event)"
-  >
-  </mat-paginator>
+    <div class="heroes-grid">
+      @for (hero of heroes; track hero.id) {
+      <a [routerLink]="['/detail', hero.id]" class="hero-card">
+        <h3>{{ hero.name }}</h3>
+        <p>Rank: {{ hero.id }}</p>
+      </a>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="total"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5,10,25,50, 100]"
+      aria-label="Select page"
+      (page)="onPageChange($event)"
+    >
+    </mat-paginator>
+  </div>
 </div>

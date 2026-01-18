@@ -1,4 +1,4 @@
 export interface Hero {
-  id: number;
+  id: string | number;
   name: string;
 }

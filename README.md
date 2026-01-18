@@ -15,12 +15,13 @@ This project has been intentionally structured to be **easy to understand** for 
 
 ## ✨ Features
 
-- 📊 **Dashboard** - View top 5 heroes with beautiful gradient cards.
-- 📋 **Heroes List** - Browse all heroes with ID badges.
+- 📊 **Dashboard** - View top heroes with beautiful gradient cards, full-width search, and pagination.
+- 📋 **Heroes List** - Browse all heroes with a modern responsive grid and pagination.
+- 🔍 **Smart Search** - Autocomplete search with debounce to find heroes instantly.
 - ✏️ **Edit Heroes** - Update hero names with real-time validation.
 - 🔄 **RESTful API** - Full integration with a local `json-server` backend.
-- 🎨 **Modern UI** - Responsive design with smooth transitions and hover effects.
--  **Responsive** - Works seamlessly on desktop and mobile devices.
+- 🎨 **Modern UI** - Professional design with custom paginators, gradients, and subtle shadows.
+- 📱 **Responsive** - Works seamlessly on desktop and mobile devices.
 
 ## 🚀 Getting Started
 
