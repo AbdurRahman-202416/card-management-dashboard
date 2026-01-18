@@ -4,13 +4,13 @@
       <h2>Top Heroes Dashboard</h2>
       
       <mat-form-field class="search-full-width" appearance="outline">
-        <mat-label>Search Heroes</mat-label>
+        <mat-label class="search-label">Search Heroes</mat-label>
         <input type="text"
                placeholder="Ex. Magma"
                matInput
                [formControl]="searchControl"
                [matAutocomplete]="auto">
-        <mat-icon matSuffix>search</mat-icon>
+    
         <mat-autocomplete #auto="matAutocomplete">
           @for (option of filteredHeroes | async; track option.id) {
             <mat-option [routerLink]="['/detail', option.id]" [value]="option.name">
@@ -25,7 +25,7 @@
       @for (hero of heroes; track hero.id) {
       <a [routerLink]="['/detail', hero.id]" class="hero-card">
         <h3>{{ hero.name }}</h3>
-        <p>Rank: {{ hero.id }}</p>
+        <p>ID: {{ hero.id }}</p>
       </a>
       }
     </div>

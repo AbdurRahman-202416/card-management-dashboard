@@ -64,5 +64,11 @@
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-top: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    width: 100%;
+    text-align: center;
   }
 }

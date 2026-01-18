@@ -52,4 +52,16 @@ nav a.active {
 .mat-mdc-paginator-container {
   padding: 0 16px;
   min-height: 48px;
+  display: flex;
+  align-items: center !important;
+  /* Force vertical center */
+  justify-content: center;
+}
+
+footer {
+  text-align: center;
+  padding: 20px 0;
+  background-color: #f1f1f1;
+  color: #666;
+  margin-top: auto;
 }
