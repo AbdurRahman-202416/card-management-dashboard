@@ -34,6 +34,8 @@ export class HeroService {
     );
   }
 
+  // http://localhost:3000/heroes/?name_like=Dr
+
   searchHeroes(term: string): Observable<Hero[]> {
     if (!term.trim()) {
       return of([]);

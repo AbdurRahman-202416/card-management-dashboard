@@ -1,1 +1,13 @@
-<p>user-register works!</p>
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <formly-form [form]="form" [model]="model" [fields]="fields"> </formly-form>
+
+  <button mat-raised-button color="primary" class="w-100 mt-3">Register Hotel</button>
+</form>
+
+<div *ngIf="showSuccessMessage" class="mat-elevation-z2 mat-alert-success mt-3 p-3">
+  Hotel registered successfully!
+</div>
+
+<div *ngIf="showErrorMessage" class="mat-elevation-z2 mat-alert-danger mt-3 p-3">
+  Please fill all required fields.
+</div>

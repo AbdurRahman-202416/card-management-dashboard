@@ -2,20 +2,22 @@
   <div class="dashboard-container">
     <div class="dashboard-header">
       <h2>Top Heroes Dashboard</h2>
-      
+
       <mat-form-field class="search-full-width" appearance="outline">
         <mat-label class="search-label">Search Heroes</mat-label>
-        <input type="text"
-               placeholder="Ex. Magma"
-               matInput
-               [formControl]="searchControl"
-               [matAutocomplete]="auto">
-    
+        <input
+          type="text"
+          placeholder="Ex. Magma"
+          matInput
+          [formControl]="searchControl"
+          [matAutocomplete]="auto"
+        />
+
         <mat-autocomplete #auto="matAutocomplete">
           @for (option of filteredHeroes | async; track option.id) {
-            <mat-option [routerLink]="['/detail', option.id]" [value]="option.name">
-              {{option.name}}
-            </mat-option>
+          <mat-option [routerLink]="['/detail', option.id]" [value]="option.name">
+            {{ option.name }}
+          </mat-option>
           }
         </mat-autocomplete>
       </mat-form-field>
@@ -33,7 +35,7 @@
     <mat-paginator
       [length]="total"
       [pageSize]="pageSize"
-      [pageSizeOptions]="[5,10,25,50, 100]"
+      [pageSizeOptions]="[5, 10, 25, 50, 100]"
       aria-label="Select page"
       (page)="onPageChange($event)"
     >

@@ -1,0 +1,23 @@
+h3 {
+  color: #007bff;
+  margin-top: 20px;
+}
+
+.formly-field {
+  margin-bottom: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+}
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+button:not(:disabled) {
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+}
