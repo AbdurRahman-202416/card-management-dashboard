@@ -1,131 +1,433 @@
-/* Main Dashboard Background */
+// Variables
+$bg-color: #f7f9fc;
+$card-bg: #ffffff;
+$text-primary: #111827;
+$text-secondary: #6b7280;
+$border-color: #e5e7eb;
+
+$color-blue: #3b48f2;
+$color-cyan: #00bfff;
+$color-yellow: #ffaf00;
+$color-green: #10b981;
+$color-red: #ef4444;
+
 .dashboard {
-  padding: 60px 0;
-  background: radial-gradient(circle at top left, #f8fafc, #e2e8f0);
+  background-color: $bg-color;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-}
+  padding: 32px;
+  font-family: 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif;
 
-.dashboard-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
 
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 60px;
+  &__title {
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.02em;
+    }
 
-  h2 {
-    color: #1e293b;
-    font-size: 2.75rem;
-    font-weight: 800;
-    margin-bottom: 30px;
-    letter-spacing: -0.04em;
-    background: linear-gradient(90deg, #2563eb, #7c3aed);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    p {
+      font-size: 13px;
+      color: $text-secondary;
+      margin: 0;
+
+      span {
+        font-weight: 500;
+      }
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: #e0e7ff;
+      color: $color-blue;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .info {
+      span {
+        display: block;
+        font-size: 13px;
+        color: $text-primary;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      small {
+        font-size: 11px;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: min-content;
+    gap: 24px;
+
+    .card--active {
+      grid-area: 1 / 1 / 2 / 2;
+    }
+
+    .card--lifecycle {
+      grid-area: 1 / 2 / 2 / 3;
+    }
+
+    .card--portfolio {
+      grid-area: 1 / 3 / 3 / 4;
+    }
+
+    .card--transactions {
+      grid-area: 2 / 1 / 3 / 2;
+    }
+
+    .card--success {
+      grid-area: 2 / 2 / 3 / 3;
+    }
+
+    .card--channel {
+      grid-area: 3 / 1 / 4 / 3;
+    }
+
+    .card--mcc {
+      grid-area: 3 / 3 / 4 / 4;
+    }
+
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+
+      .card--active {
+        grid-area: auto;
+      }
+
+      .card--lifecycle {
+        grid-area: auto;
+      }
+
+      .card--portfolio {
+        grid-area: auto;
+        grid-column: span 2;
+      }
+
+      .card--transactions {
+        grid-area: auto;
+      }
+
+      .card--success {
+        grid-area: auto;
+      }
+
+      .card--channel {
+        grid-area: auto;
+        grid-column: span 2;
+      }
+
+      .card--mcc {
+        grid-area: auto;
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+
+      .card {
+        grid-area: auto !important;
+        grid-column: 1 !important;
+      }
+    }
   }
 }
 
-/* Refined Search Bar */
-.search-full-width {
-  width: 100%;
-  max-width: 600px; /* Centered and contained */
-  margin: 0 auto;
-
-  :host ::ng-deep .mat-mdc-text-field-wrapper {
-    background-color: white !important;
-    border-radius: 50px !important; /* Pill shape */
-    padding: 0 12px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  }
-
-  :host ::ng-deep .mat-mdc-form-field-focus-indicator {
-    display: none; /* Removes harsh underline */
-  }
-}
-
-/* Hero Grid Layout */
-.heroes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-/* Individual Hero Card - Glassmorphism style */
-.hero-card {
-  background: white;
-  color: #1e293b;
-  padding: 30px 20px;
-  border-radius: 20px;
-  text-decoration: none;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.card {
+  background: $card-bg;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
 
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    .title {
+      h3 {
+        font-size: 15px;
+        font-weight: 600;
+        color: $text-primary;
+        margin: 0 0 6px 0;
+      }
 
-    &::before {
-      opacity: 1;
+      p {
+        font-size: 12px;
+        color: $text-secondary;
+        margin: 0;
+      }
     }
 
-    h3 {
-      color: #2563eb;
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
     }
   }
 
-  h3 {
-    margin: 0;
-    font-size: 1.4rem;
+  &__number {
+    font-size: 28px;
     font-weight: 700;
-    color: #334155;
-    transition: color 0.3s;
+    color: $text-primary;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
   }
 
-  p {
-    margin-top: 10px;
-    font-size: 0.85rem;
+  &__subtitle {
+    font-size: 12px;
+    color: $text-secondary;
+  }
+}
+
+// Custom Visuals Layouts
+.active-cards {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+
+  &__chart {
+    flex: 0 0 120px;
+    position: relative;
+    height: 120px;
+    margin-right: -10px;
+    margin-left: -15px;
+  }
+
+  &__legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 20px;
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+
+      .label {
+        color: $text-secondary;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          display: block;
+          width: 8px;
+          height: 2px;
+          border-radius: 2px;
+        }
+      }
+
+      .value {
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      &--debit .label::before {
+        background-color: $color-blue;
+      }
+
+      &--prepaid .label::before {
+        background-color: $color-cyan;
+      }
+
+      &--credit .label::before {
+        background-color: $color-yellow;
+      }
+
+      &--approved .label::before {
+        background-color: $color-green;
+      }
+
+      &--declined .label::before {
+        background-color: $color-red;
+      }
+    }
+  }
+}
+
+.lifecycle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed $border-color;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .label {
+      color: $text-secondary;
+    }
+
+    .value {
+      font-weight: 600;
+      color: $text-primary;
+    }
+  }
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed $border-color;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .label {
+      color: $text-secondary;
+    }
+
+    .value-box {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+
+      .val {
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .trend {
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+
+        &--up {
+          color: $color-green;
+        }
+
+        &--down {
+          color: $color-red;
+        }
+      }
+    }
+  }
+}
+
+.btn-toggle {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+
+  button {
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: $text-secondary;
+    border-radius: 4px;
+    cursor: pointer;
     font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: white;
+      color: $text-primary;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
   }
 }
 
-/* Paginator Styling */
-mat-paginator {
-  background: transparent !important;
-  margin-top: 20px;
-  color: #64748b;
+.dropdown-sm {
+  border: 1px solid $border-color;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: $text-secondary;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .dashboard-header h2 {
-    font-size: 2rem;
+.date-badge {
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: $text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  i {
+    font-size: 12px;
   }
-  .heroes-grid {
-    grid-template-columns: 1fr;
+}
+
+.label-filter {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: $text-secondary;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.chart-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+
+  &--fixed-height {
+    min-height: 250px;
   }
 }

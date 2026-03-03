@@ -23,6 +23,12 @@ This project has been intentionally structured to be **easy to understand** for 
 - 🎨 **Modern UI** - Professional design with custom paginators, gradients, and subtle shadows.
 - 📱 **Responsive** - Works seamlessly on desktop and mobile devices.
 
+## 📊 Dashboard Overview
+
+The new analytics dashboard provides a comprehensive view of card and transaction metrics.
+
+![Dashboard Preview](src/assets/screenshots/dashboard.png)
+
 ## 🚀 Getting Started
 
 ### Prerequisites

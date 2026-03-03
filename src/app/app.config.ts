@@ -1,5 +1,6 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideHighcharts } from 'highcharts-angular';
 import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { MatPaginatorIntl } from '@angular/material/paginator';
@@ -12,6 +13,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
+    provideHighcharts(),
     { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
     provideAnimations(),
     importProvidersFrom(FormlyModule.forRoot(), FormlyMaterialModule),
