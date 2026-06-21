@@ -1,0 +1,55 @@
+<div class="banking-container">
+  <mat-card class="banking-card">
+    <div class="banking-header">
+      <div class="header-icon-container">
+        <i class="material-icons banking-header-icon">account_balance</i>
+      </div>
+      <mat-card-title class="banking-title">Apply for a New Account</mat-card-title>
+      <mat-card-subtitle class="banking-subtitle">Complete the details below to open your secure personal bank account</mat-card-subtitle>
+    </div>
+
+    <mat-card-content class="banking-content">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <formly-form [form]="form" [model]="model" [fields]="fields"></formly-form>
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="!form.valid"
+            class="submit-button"
+          >
+            Submit Application
+          </button>
+        </div>
+      </form>
+
+      <div
+        *ngIf="showSuccessMessage"
+        class="mat-elevation-z2 mat-alert-success mt-4 p-3"
+      >
+        <div class="alert-content">
+          <i class="material-icons">check_circle</i>
+          <div class="alert-text">
+            <strong>Application Submitted!</strong>
+            <span>Your personal banking account setup is being processed. Our team will contact you shortly.</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="showErrorMessage"
+        class="mat-elevation-z2 mat-alert-danger mt-4 p-3"
+      >
+        <div class="alert-content">
+          <i class="material-icons">error</i>
+          <div class="alert-text">
+            <strong>Validation Error</strong>
+            <span>Please complete all required fields correctly before submitting.</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

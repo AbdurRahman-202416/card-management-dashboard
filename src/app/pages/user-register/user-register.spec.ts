@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { FormlyModule } from '@ngx-formly/core';
+import { FormlyMaterialModule } from '@ngx-formly/material';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { UserRegister } from './user-register';
 
 describe('UserRegister', () => {
@@ -8,7 +11,7 @@ describe('UserRegister', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserRegister]
+      imports: [UserRegister, FormlyModule.forRoot(), FormlyMaterialModule, NoopAnimationsModule]
     })
     .compileComponents();
 

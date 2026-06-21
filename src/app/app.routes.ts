@@ -22,4 +22,8 @@ export const routes: Routes = [
     path: 'detail/:id',
     loadComponent: () => import('./pages/hero-detail/hero-detail').then((m) => m.HeroDetail),
   },
+  {
+    path: 'banking-form',
+    loadComponent: () => import('./pages/banking-form/banking-form').then((m) => m.BankingForm),
+  },
 ];
