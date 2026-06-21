@@ -1,44 +1,193 @@
 <div class="dashboard">
-  <div class="dashboard-container">
-    <div class="dashboard-header">
-      <h2>Top Heroes Dashboard</h2>
+  <div class="dashboard__header">
+    <div class="dashboard__title">
+      <h1>Dashboard</h1>
+      <p>Dashboard - <span>Home</span></p>
+    </div>
+    <div class="dashboard__user">
+      <div class="avatar">L</div>
+      <div class="info">
+        <span>Last Log in</span>
+        <small>22-May-2022 10:10 PM</small>
+      </div>
+    </div>
+  </div>
 
-      <mat-form-field class="search-full-width" appearance="outline">
-        <mat-label class="search-label">Search Heroes</mat-label>
-        <input
-          type="text"
-          placeholder="Ex. Magma"
-          matInput
-          [formControl]="searchControl"
-          [matAutocomplete]="auto"
-        />
-
-        <mat-autocomplete #auto="matAutocomplete">
-          @for (option of filteredHeroes | async; track option.id) {
-          <mat-option [routerLink]="['/detail', option.id]" [value]="option.name">
-            {{ option.name }}
-          </mat-option>
-          }
-        </mat-autocomplete>
-      </mat-form-field>
+  <div class="dashboard__grid">
+    <!-- Active Cards -->
+    <div class="card card--active">
+      <div class="card__header" style="margin-bottom: 0;">
+        <div class="title">
+          <div class="card__number">{{ dashboardData.activeCards.total }}</div>
+          <p class="card__subtitle">Total active cards</p>
+        </div>
+      </div>
+      <div class="active-cards">
+        <div class="active-cards__chart">
+          <highcharts-chart [options]="activeCardsChartOptions"
+            style="width: 100%; height: 160px; display: block;"></highcharts-chart>
+        </div>
+        <div class="active-cards__legend">
+          <div class="item item--debit">
+            <span class="label">Debit</span>
+            <span class="value">{{ dashboardData.activeCards.debit | number }}</span>
+          </div>
+          <div class="item item--prepaid">
+            <span class="label">Prepaid</span>
+            <span class="value">{{ dashboardData.activeCards.prepaid | number }}</span>
+          </div>
+          <div class="item item--credit">
+            <span class="label">Credit</span>
+            <span class="value">{{ dashboardData.activeCards.credit | number }}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="heroes-grid">
-      @for (hero of heroes; track hero.id) {
-      <a [routerLink]="['/detail', hero.id]" class="hero-card">
-        <h3>{{ hero.name }}</h3>
-        <p>ID: {{ hero.id }}</p>
-      </a>
-      }
+    <!-- Card Lifecycle -->
+    <div class="card card--lifecycle">
+      <div class="card__header">
+        <div class="title">
+          <h3>Card Lifecycle</h3>
+          <p>Summary of card issuance lifecycle</p>
+        </div>
+      </div>
+      <div class="lifecycle-list">
+        <div class="item">
+          <span class="label">Issued this month</span>
+          <span class="value">{{ dashboardData.lifecycle.issued }}</span>
+        </div>
+        <div class="item">
+          <span class="label">Pending activations</span>
+          <span class="value">{{ dashboardData.lifecycle.pending }}</span>
+        </div>
+        <div class="item">
+          <span class="label">Expired</span>
+          <span class="value">{{ dashboardData.lifecycle.expired }}</span>
+        </div>
+      </div>
     </div>
 
-    <mat-paginator
-      [length]="total"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 25, 50, 100]"
-      aria-label="Select page"
-      (page)="onPageChange($event)"
-    >
-    </mat-paginator>
+    <!-- Card Portfolio Overview (Spans vertically) -->
+    <div class="card card--portfolio">
+      <div class="card__header">
+        <div class="title">
+          <h3>Card Portfolio Overview</h3>
+          <p>Issued cards by BIN and card type</p>
+        </div>
+        <div class="actions">
+          <div class="btn-toggle">
+            <button class="active">BIN View</button>
+            <button>Card Range View</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <!-- Render Stacked Horizontal Bar Chart -->
+        <highcharts-chart [options]="portfolioChartOptions"
+          style="width: 100%; height: 350px; display: block;"></highcharts-chart>
+      </div>
+    </div>
+
+    <!-- Total transactions today -->
+    <div class="card card--transactions">
+      <div class="card__header" style="margin-bottom: 0;">
+        <div class="title">
+          <div class="card__number">{{ dashboardData.transactions.total }}</div>
+          <p class="card__subtitle">Total transactions today</p>
+        </div>
+      </div>
+      <div class="transactions-list">
+        <div class="item">
+          <span class="label">Domestic</span>
+          <div class="value-box">
+            <span class="val">{{ dashboardData.transactions.domestic }}</span>
+            <span class="trend trend--down">↘</span>
+          </div>
+        </div>
+        <div class="item">
+          <span class="label">International</span>
+          <div class="value-box">
+            <span class="val">{{ dashboardData.transactions.international }}</span>
+            <span class="trend trend--up">↗</span>
+          </div>
+        </div>
+        <div class="item">
+          <span class="label">Total volume</span>
+          <div class="value-box">
+            <span class="val">{{ dashboardData.transactions.volume }}</span>
+            <span class="trend trend--up">↗</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success rate today -->
+    <div class="card card--success">
+      <div class="card__header" style="margin-bottom: 0;">
+        <div class="title">
+          <div class="card__number">{{ dashboardData.successRate.rate }}</div>
+          <p class="card__subtitle">Success rate today</p>
+        </div>
+      </div>
+      <div class="active-cards">
+        <div class="active-cards__chart">
+          <highcharts-chart [options]="successRateChartOptions"
+            style="width: 100%; height: 160px; display: block;"></highcharts-chart>
+        </div>
+        <div class="active-cards__legend">
+          <div class="item item--approved">
+            <span class="label">Approved</span>
+            <span class="value">{{ dashboardData.successRate.approved }}</span>
+          </div>
+          <div class="item item--declined">
+            <span class="label">Declined</span>
+            <span class="value">{{ dashboardData.successRate.declined }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Overview by Channel -->
+    <div class="card card--channel">
+      <div class="card__header">
+        <div class="title">
+          <h3>Transaction Overview by Channel</h3>
+        </div>
+        <div class="actions">
+          <span class="label-filter">Channel</span>
+          <select class="dropdown-sm">
+            <option>POS</option>
+            <option>ATM</option>
+          </select>
+          <div class="date-badge">
+            Last 7 Days 📅
+          </div>
+        </div>
+      </div>
+      <div class="chart-container chart-container--fixed-height">
+        <highcharts-chart [options]="transactionChartOptions"
+          style="width: 100%; height: 260px; display: block;"></highcharts-chart>
+      </div>
+    </div>
+
+    <!-- Top Merchant Categories (MCC) -->
+    <div class="card card--mcc">
+      <div class="card__header">
+        <div class="title">
+          <h3>Top Merchant Categories (MCC)</h3>
+          <p>Spending distribution by merchant category</p>
+        </div>
+        <div class="actions">
+          <div class="date-badge">
+            Last 7 Days 📅
+          </div>
+        </div>
+      </div>
+      <div class="chart-container chart-container--fixed-height">
+        <highcharts-chart [options]="mccChartOptions"
+          style="width: 100%; height: 260px; display: block;"></highcharts-chart>
+      </div>
+    </div>
   </div>
 </div>

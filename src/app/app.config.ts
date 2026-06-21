@@ -1,6 +1,7 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHighcharts } from 'highcharts-angular';
 import { routes } from './app.routes';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { CustomPaginatorIntl } from './shared/custom-paginator-intl';
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([mockApiInterceptor])),
+    provideHighcharts(),
     { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
     provideAnimations(),
     importProvidersFrom(
