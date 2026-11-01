@@ -1,213 +1,242 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import * as Highcharts from 'highcharts';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import type * as Highcharts from 'highcharts';
 import { HighchartsChartComponent } from 'highcharts-angular';
+import { CountUpDirective } from '../../shared/count-up.directive';
+import {
+  ALERTS,
+  AlertItem,
+  DashboardData,
+  Kpi,
+  RECENT_TRANSACTIONS,
+  RangeKey,
+  Transaction,
+  TxnStatus,
+  buildDashboardData,
+  formatBdt,
+  maskCard,
+  timeAgo,
+} from './dashboard.data';
+import {
+  PALETTE,
+  binsChart,
+  categoriesChart,
+  donutChart,
+  hoursChart,
+  volumeChart,
+} from './dashboard.charts';
+
+type StatusFilter = 'all' | TxnStatus;
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, HighchartsChartComponent],
+  imports: [DatePipe, DecimalPipe, HighchartsChartComponent, CountUpDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard implements OnInit {
-  Highcharts: typeof Highcharts = Highcharts;
+export class Dashboard implements OnInit, OnDestroy {
+  readonly ranges: RangeKey[] = ['7D', '30D', '90D'];
+  readonly statusFilters: StatusFilter[] = ['all', 'approved', 'pending', 'declined'];
+  readonly alerts: AlertItem[] = ALERTS;
+  readonly formatBdt = formatBdt;
+  readonly maskCard = maskCard;
+  readonly timeAgo = timeAgo;
 
-  // Mock Data
-  dashboardData = {
-    activeCards: {
-      total: '4,230',
-      debit: 2150,
-      prepaid: 1420,
-      credit: 660,
-    },
-    lifecycle: {
-      issued: 320,
-      pending: 55,
-      expired: 18,
-    },
-    transactions: {
-      total: '58,200',
-      domestic: '42,000',
-      international: '16,200',
-      volume: '৳ 1.2M', // Tk symbol is used in the image
-    },
-    successRate: {
-      rate: '95%',
-      approved: '55,000',
-      declined: '3,000',
-    }
-  };
+  range: RangeKey = '30D';
+  loading = true;
+  updatedAt = new Date();
 
-  activeCardsChartOptions: Highcharts.Options = {};
-  portfolioChartOptions: Highcharts.Options = {};
-  successRateChartOptions: Highcharts.Options = {};
-  transactionChartOptions: Highcharts.Options = {};
-  mccChartOptions: Highcharts.Options = {};
+  data!: DashboardData;
+  statusFilter: StatusFilter = 'all';
+  search = '';
 
-  ngOnInit() {
-    this.initCharts();
+  volumeOptions: Highcharts.Options = {};
+  cardMixOptions: Highcharts.Options = {};
+  approvalOptions: Highcharts.Options = {};
+  hoursOptions: Highcharts.Options = {};
+  categoriesOptions: Highcharts.Options = {};
+  binsOptions: Highcharts.Options = {};
+
+  selected: Transaction | null = null;
+
+  @ViewChild('detailDialog') private detailDialog!: ElementRef<HTMLDialogElement>;
+
+  private loadTimer?: ReturnType<typeof setTimeout>;
+
+  ngOnInit(): void {
+    this.load(550);
   }
 
-  initCharts() {
-    // 1. Donut Chart for Active Cards
-    this.activeCardsChartOptions = {
-      chart: { type: 'pie', height: 160, backgroundColor: 'transparent', margin: [0, 0, 0, 0] },
-      title: { text: '' },
-      credits: { enabled: false },
-      tooltip: { enabled: false },
-      plotOptions: {
-        pie: {
-          innerSize: '75%',
-          dataLabels: { enabled: false },
-          borderWidth: 0,
-          colors: ['#3b48f2', '#00bfff', '#ffaf00']
-        }
-      },
-      series: [{
-        type: 'pie',
-        name: 'Cards',
-        data: [
-          ['Debit', this.dashboardData.activeCards.debit],
-          ['Prepaid', this.dashboardData.activeCards.prepaid],
-          ['Credit', this.dashboardData.activeCards.credit]
-        ]
-      }]
-    };
+  ngOnDestroy(): void {
+    clearTimeout(this.loadTimer);
+  }
 
-    // 2. Stacked Horizontal Bar for Portfolio Overview
-    this.portfolioChartOptions = {
-      chart: { type: 'bar', height: 280, backgroundColor: 'transparent' },
-      title: { text: '' },
-      xAxis: {
-        categories: ['506123', '506456', '506789', '507111', '508222', '509999'],
-        lineWidth: 0,
-        tickWidth: 0,
-        labels: { style: { color: '#6e7a8a', fontSize: '11px' } }
-      },
-      yAxis: {
-        min: 0,
-        title: { text: '' },
-        gridLineColor: '#f0f2f5',
-        labels: { formatter: function () { return (this.value as number) / 1000 + 'K'; }, style: { color: '#6e7a8a', fontSize: '11px' } }
-      },
-      legend: {
-        enabled: true,
-        align: 'center',
-        verticalAlign: 'top',
-        itemStyle: { color: '#6e7a8a', fontWeight: 'normal', fontSize: '12px' },
-        symbolRadius: 2,
-      },
-      plotOptions: {
-        series: {
-          stacking: 'normal',
-          borderWidth: 0
-        },
-        bar: {
-          pointWidth: 20
-        }
-      },
-      tooltip: { enabled: false },
-      credits: { enabled: false },
-      series: [
-        { type: 'bar', name: 'Debit Card', color: '#524eee', data: [600, 400, 500, 300, 200, 150] },
-        { type: 'bar', name: 'Prepaid Card', color: '#00bfff', data: [200, 300, 200, 250, 250, 220] },
-        { type: 'bar', name: 'Credit Card', color: '#ffb020', data: [100, 50, 100, 150, 120, 140] }
-      ]
-    };
+  setRange(range: RangeKey): void {
+    if (range !== this.range) {
+      this.range = range;
+      this.load(450);
+    }
+  }
 
-    // 3. Success Rate Donut Chart
-    this.successRateChartOptions = {
-      chart: { type: 'pie', height: 160, backgroundColor: 'transparent', margin: [0, 0, 0, 0] },
-      title: { text: '' },
-      credits: { enabled: false },
-      tooltip: { enabled: false },
-      plotOptions: {
-        pie: {
-          innerSize: '75%',
-          dataLabels: { enabled: false },
-          borderWidth: 0,
-          colors: ['#6ed18c', '#ff6b6b']
-        }
-      },
-      series: [{
-        type: 'pie',
-        name: 'Rate',
-        data: [
-          ['Approved', 55000],
-          ['Declined', 3000]
-        ]
-      }]
-    };
+  refresh(): void {
+    this.load(650);
+  }
 
-    // 4. Smooth Area Chart for Transaction Overview
-    this.transactionChartOptions = {
-      chart: { type: 'areaspline', height: 250, backgroundColor: 'transparent' },
-      title: { text: '' },
-      xAxis: {
-        categories: ['Sep 27', 'Sep 28', 'Sep 29', 'Sep 30', 'Oct 1', 'Oct 2', 'Oct 3'],
-        tickmarkPlacement: 'on',
-        lineWidth: 0,
-        labels: { style: { color: '#6e7a8a', fontSize: '11px' } },
-        tickWidth: 0,
-      },
-      yAxis: {
-        title: { text: '' },
-        labels: { formatter: function () { return (this.value as number) / 1000 + 'K'; }, style: { color: '#6e7a8a', fontSize: '11px' } },
-        gridLineColor: '#f0f2f5'
-      },
-      tooltip: { enabled: true, shared: true },
-      credits: { enabled: false },
-      legend: {
-        align: 'center',
-        verticalAlign: 'bottom',
-        itemStyle: { color: '#6e7a8a', fontWeight: 'normal', fontSize: '12px' },
-        symbolRadius: 6,
-      },
-      plotOptions: {
-        areaspline: { fillOpacity: 0.1, marker: { enabled: false }, lineWidth: 2 }
-      },
-      series: [
-        { type: 'areaspline', name: 'Domestic', color: '#6ed18c', data: [150, 450, 600, 420, 520, 800, 600] },
-        { type: 'areaspline', name: 'International', color: '#524eee', data: [500, 650, 420, 850, 680, 1900, 1750] }
-      ]
-    };
+  setStatusFilter(filter: StatusFilter): void {
+    this.statusFilter = filter;
+  }
 
-    // 5. MCC Top Merchant Categories (Semi-circle donut)
-    this.mccChartOptions = {
-      chart: { type: 'pie', height: 250, backgroundColor: 'transparent' },
-      title: { text: '' },
-      tooltip: { enabled: false },
-      credits: { enabled: false },
-      plotOptions: {
-        pie: {
-          startAngle: -90,
-          endAngle: 90,
-          center: ['50%', '75%'],
-          size: '150%',
-          innerSize: '60%',
-          borderWidth: 1,
-          borderColor: '#fff',
-          dataLabels: {
-            enabled: true,
-            format: '{point.y}%',
-            distance: -30,
-            style: { fontWeight: 'bold', color: 'white', textOutline: 'none', fontSize: '12px' }
-          }
-        }
+  onSearch(event: Event): void {
+    this.search = (event.target as HTMLInputElement).value.trim().toLowerCase();
+  }
+
+  openDetails(txn: Transaction): void {
+    this.selected = txn;
+    this.detailDialog.nativeElement.showModal();
+  }
+
+  closeDetails(): void {
+    this.detailDialog.nativeElement.close();
+  }
+
+  // The dialog element itself is the backdrop target; clicks inside content have a child target.
+  onDialogClick(event: MouseEvent): void {
+    if (event.target === this.detailDialog.nativeElement) {
+      this.closeDetails();
+    }
+  }
+
+  settlementNote(txn: Transaction): string {
+    switch (txn.status) {
+      case 'approved':
+        return 'Scheduled for next business day';
+      case 'pending':
+        return 'Awaiting settlement';
+      default:
+        return 'Funds were not moved';
+    }
+  }
+
+  get transactions(): Transaction[] {
+    return RECENT_TRANSACTIONS.filter((txn) => {
+      const matchesStatus = this.statusFilter === 'all' || txn.status === this.statusFilter;
+      const matchesSearch =
+        !this.search ||
+        `${txn.merchant} ${txn.id} ${txn.category} ${txn.card} ${txn.product} ${txn.cardType}`
+          .toLowerCase()
+          .includes(this.search);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  get cardTotal(): number {
+    return this.data.cardMix.reduce((total, item) => total + item.value, 0);
+  }
+
+  get cardMixColors(): string[] {
+    return [PALETTE.primary, PALETTE.sky, PALETTE.amber];
+  }
+
+  get peakHour(): string {
+    const peak = Math.max(...this.data.hours);
+    return this.hourLabel(this.data.hours.indexOf(peak));
+  }
+
+  get hourStats(): { label: string; value: string; hint: string }[] {
+    const hours = this.data.hours;
+    const total = hours.reduce((sum, v) => sum + v, 0);
+    const compact = (n: number) =>
+      n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toLocaleString('en-IN');
+
+    // Busiest rolling 3-hour window, useful for staffing and rule tuning.
+    let windowStart = 0;
+    let windowSum = 0;
+    for (let i = 0; i <= hours.length - 3; i++) {
+      const sum = hours[i] + hours[i + 1] + hours[i + 2];
+      if (sum > windowSum) {
+        windowSum = sum;
+        windowStart = i;
+      }
+    }
+
+    const peak = Math.max(...hours);
+    const quiet = Math.min(...hours);
+    return [
+      { label: 'Peak hour', value: this.peakHour, hint: `${compact(peak)} transactions` },
+      {
+        label: 'Busiest 3 hours',
+        value: `${this.hourLabel(windowStart)}–${this.hourLabel(windowStart + 3)}`,
+        hint: `${Math.round((windowSum / total) * 100)}% of daily volume`,
       },
-      series: [{
-        type: 'pie',
-        name: 'MCC',
-        data: [
-          { name: 'Cat 1', y: 28, color: '#3c38d2' },
-          { name: 'Cat 2', y: 24, color: '#5450f2' },
-          { name: 'Cat 3', y: 17, color: '#7e7bf5' },
-          { name: 'Cat 4', y: 13, color: '#a09ef7' },
-          { name: 'Cat 5', y: 10, color: '#bab9fa' },
-          { name: 'Cat 6', y: 8, color: '#d0cffc' }
-        ]
-      }]
-    };
+      { label: 'Quietest hour', value: this.hourLabel(hours.indexOf(quiet)), hint: `${compact(quiet)} transactions` },
+      { label: 'Hourly average', value: compact(Math.round(total / 24)), hint: 'transactions per hour' },
+    ];
+  }
+
+  trackKpi(_: number, kpi: Kpi): string {
+    return kpi.id;
+  }
+
+  sparkLine(values: number[]): string {
+    return this.sparkPoints(values)
+      .map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`)
+      .join(' ');
+  }
+
+  sparkArea(values: number[]): string {
+    return `${this.sparkLine(values)} L100 32 L0 32 Z`;
+  }
+
+  // For "Fraud blocked" and similar, a falling number is good news.
+  isPositive(kpi: Kpi): boolean {
+    return kpi.id === 'fraud' ? kpi.delta < 0 : kpi.delta >= 0;
+  }
+
+  funnelWidth(value: number): number {
+    return Math.round((value / this.data.lifecycle[0].value) * 100);
+  }
+
+  private hourLabel(hour: number): string {
+    return `${(hour % 24).toString().padStart(2, '0')}:00`;
+  }
+
+  private sparkPoints(values: number[]): [number, number][] {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || 1;
+    return values.map((v, i) => [
+      (i / (values.length - 1)) * 100,
+      28 - ((v - min) / span) * 24,
+    ]);
+  }
+
+  private load(delay: number): void {
+    clearTimeout(this.loadTimer);
+    this.loading = true;
+    this.loadTimer = setTimeout(() => {
+      this.data = buildDashboardData(this.range);
+      this.buildCharts();
+      this.updatedAt = new Date();
+      this.loading = false;
+    }, delay);
+  }
+
+  private buildCharts(): void {
+    const d = this.data;
+    this.volumeOptions = volumeChart(d);
+    this.hoursOptions = hoursChart(d);
+    this.categoriesOptions = categoriesChart(d);
+    this.binsOptions = binsChart(d);
+    this.cardMixOptions = donutChart(
+      d.cardMix.map((item, i) => ({ name: item.name, y: item.value, color: this.cardMixColors[i] })),
+      'Cards',
+    );
+    this.approvalOptions = donutChart(
+      [
+        { name: 'Approved', y: d.approval.approved, color: PALETTE.green },
+        { name: 'Declined', y: d.approval.declined, color: PALETTE.red },
+      ],
+      'Authorizations',
+    );
   }
 }

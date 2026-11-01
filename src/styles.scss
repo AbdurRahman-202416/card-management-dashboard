@@ -1,67 +1,93 @@
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
-
-nav a {
-  padding: 10px 15px;
-  text-decoration: none;
-  margin-top: 10px;
-  display: inline-block;
-  background-color: #e8e8e8;
-  color: #3d3d3d;
-  border-radius: 4px;
-  margin-right: 10px;
-  transition: background-color 0.3s, color 0.3s;
+body {
+  margin: 0;
+  background: #f4f7fb;
+  color: #0f1b3d;
+  font-family: 'Fira Sans', 'Noto Sans Bengali', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-nav {
+.topbar {
   position: fixed;
   top: 0;
-  width: 100%;
-  background-color: #f8f8f8;
-  padding: 5px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-}
-
-nav a:hover {
-  color: white;
-  background-color: #42545c;
-}
-
-nav a.active {
-  background-color: #333;
-  color: white;
-}
-
-/* Global Paginator Styles */
-.mat-mdc-paginator {
-  background: white;
-  border-radius: 8px;
-  margin-top: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  display: flex !important;
-  justify-content: center;
-  /* Center the paginator content */
-}
-
-.mat-mdc-paginator-outer-container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
   width: 100%;
-  display: flex;
-  justify-content: center;
+  height: 68px;
+  padding: 0 24px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e3e9f3;
 }
 
-.mat-mdc-paginator-container {
-  padding: 0 16px;
-  min-height: 48px;
+.brand {
   display: flex;
-  align-items: center !important;
-  /* Force vertical center */
-  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #0f1b3d;
+  text-decoration: none;
+
+  &__mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  &__tag {
+    margin-left: 2px;
+    color: #5b6b86;
+    font-weight: 500;
+  }
+
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+.topbar__spacer {
+  flex: 1;
+}
+
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1e40af;
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  &-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    strong { font-size: 0.875rem; }
+    small { color: #5b6b86; font-size: 0.75rem; }
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar { gap: 12px; padding: 0 16px; }
+  .brand__name, .topbar__user-text { display: none; }
 }
 
 footer {
   text-align: center;
   padding: 20px 0;
-  background-color: #f1f1f1;
-  color: #666;
+  border-top: 1px solid #e3e9f3;
+  color: #5b6b86;
+  font-size: 0.8125rem;
   margin-top: auto;
 }

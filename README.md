@@ -1,159 +1,56 @@
-# 🦸 Angular Heroes
+# Card Management Dashboard
 
-A simplified, educational Angular application for managing superheroes, specifically designed for junior developers to learn core Angular concepts. This project demonstrates CRUD functionality using traditional Angular patterns.
+A card analytics and operations dashboard for the Bangladesh market. It shows portfolio, transaction and risk metrics in one responsive screen, with amounts in BDT (৳) using lakh/crore formatting.
 
-![Angular](https://img.shields.io/badge/Angular-19.2.0-red?style=flat-square&logo=angular)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square&logo=typescript)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+> The app runs entirely on generated sample data. There is no backend, no real-time feed and no deployment target; it is a front-end showcase.
 
-## 🎯 Project Goals
+![Card Management Dashboard](docs/dashboard.png)
 
-This project has been intentionally structured to be **easy to understand** for beginners:
-- **Angular 19.2.0**: Uses a stable, widely-used version of Angular.
-- **Simplified Code**: Complex features like Signals, Resources, and SSR have been replaced with traditional, easy-to-follow patterns (Observables, Services, standard Dependency Injection).
-- **Clean Structure**: No distractions—comments and unused test files have been removed to focus purely on the application logic.
+## Features
 
-## ✨ Features
+- **KPI cards** for volume, transactions, approval rate, active cards, average ticket and fraud blocked, each with a sparkline and change vs the previous period
+- **Charts** for transaction volume, card mix, authorization outcomes, activity by hour, merchant categories and portfolio by BIN
+- **Insights** such as top decline reasons, a card lifecycle funnel and risk alerts
+- **Recent transactions** table with product type (for example Platinum Credit or Gift Prepaid), a masked card number (`5061 ******** 4821`), status filter and search by merchant, ID, card or product. Select a row to open a details dialog (amount, product type, response code, authorization code, fee, net amount and a status timeline)
+- **Date range** switch (7D / 30D / 90D)
+- **Responsive** from 320px phones to wide desktops: the table becomes a card list and the dialog becomes a bottom sheet on small screens
+- **Accessible**: keyboard navigation, visible focus, labelled controls, chart accessibility module, and `prefers-reduced-motion` support
+- **Motion**: staggered reveal, count-up numbers, animated charts and progress bars
 
-- 📊 **Dashboard** - View top heroes with beautiful gradient cards, full-width search, and pagination.
-- 📋 **Heroes List** - Browse all heroes with a modern responsive grid and pagination.
-- 🔍 **Smart Search** - Autocomplete search with debounce to find heroes instantly.
-- ✏️ **Edit Heroes** - Update hero names with real-time validation.
-- 🔄 **RESTful API** - Full integration with a local `json-server` backend.
-- 🎨 **Modern UI** - Professional design with custom paginators, gradients, and subtle shadows.
-- 📱 **Responsive** - Works seamlessly on desktop and mobile devices.
+## Tech stack
 
-## 📊 Dashboard Overview
+Angular 19 (standalone components, lazy-loaded route), Highcharts 12 via `highcharts-angular`, SCSS. No UI framework; styling uses CSS variables and a small set of design tokens (Fira Sans / Fira Code, blue and amber).
 
-The new analytics dashboard provides a comprehensive view of card and transaction metrics.
+## Getting started
 
-![Dashboard Preview](src/assets/screenshots/dashboard.png)
+Requires Node.js 18+ and npm.
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [npm](https://www.npmjs.com/) (v9 or higher)
-- [Angular CLI](https://angular.dev/tools/cli) (v19 or higher)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/AbdurRahman-202416/angular-heroes.git
-   cd angular-heroes
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Install json-server globally** (if not already installed)
-   ```bash
-   npm install -g json-server
-   ```
-
-### Running the Application
-
-You need to run **two servers** simultaneously (in separate terminal windows):
-
-#### Terminal 1: Start the API Server
-This mimics a real backend database.
 ```bash
-npm run server
-```
-*Runs on: `http://localhost:3000`*
-
-#### Terminal 2: Start the Angular App
-This starts the frontend application.
-```bash
-npm start
-```
-*Runs on: `http://localhost:4200`*
-
-### Access the Application
-
-Open your browser and navigate to:
-```
-http://localhost:4200
+npm install
+npm start        # http://localhost:4200
 ```
 
-## 📁 Project Structure
+| Command | Purpose |
+|---|---|
+| `npm start` | Development server |
+| `npm run build` | Production build into `dist/card-management-dashboard` |
+| `npm test` | Unit tests (Karma + Jasmine, needs Chrome) |
+
+## Project structure
 
 ```
-angular-heroes/
-├── src/
-│   ├── app/
-│   │   ├── models/
-│   │   │   └── hero.model.ts          # Hero data interface
-│   │   ├── services/
-│   │   │   └── hero.service.ts        # API communication (HTTP calls)
-│   │   ├── pages/
-│   │   │   ├── dashboard/             # Top heroes view
-│   │   │   ├── heroes-page/           # List of all heroes
-│   │   │   └── hero-detail/           # Edit hero details
-│   │   ├── app.routes.ts              # Routing configuration
-│   │   ├── app.config.ts              # App providers setup
-│   │   └── app.ts                     # Root component
-│   └── styles.scss                    # Global styles
-├── db.json                            # Mock database
-├── package.json                       # Dependencies
-└── README.md                          # Documentation
+src/app
+├── app.*                         Shell: top bar, router outlet, footer
+├── pages/dashboard
+│   ├── dashboard.ts|html|scss    Page component and styles
+│   ├── dashboard.data.ts         Seeded sample data, BDT formatting, card masking, transactions
+│   ├── dashboard.charts.ts       Highcharts option builders
+│   └── *.spec.ts                 Unit tests
+└── shared/count-up.directive.ts  Animated number directive
 ```
 
-## 🛠️ Technologies Used
+## Notes
 
-- **[Angular 19](https://angular.dev/)** - The core framework.
-- **[TypeScript](https://www.typescriptlang.org/)** - For type-safe code.
-- **[RxJS](https://rxjs.dev/)** - For handling asynchronous data (Observables).
-- **[json-server](https://github.com/typicode/json-server)** - For a quick and easy REST API.
-- **[SCSS](https://sass-lang.com/)** - For modular and powerful styling.
-
-## 📚 API Endpoints
-
-The `json-server` provides the following REST API endpoints:
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/heroes` | Get all heroes |
-| GET | `/heroes/:id` | Get hero by ID |
-| POST | `/heroes` | Create a new hero |
-| PUT | `/heroes/:id` | Update hero by ID |
-| DELETE | `/heroes/:id` | Delete hero by ID |
-
-## 🎯 Usage Guide
-
-### View Dashboard
-Navigate to the home page to see the top 5 heroes displayed in gradient cards.
-
-### Browse All Heroes
-Click on "Heroes" in the navbar to view the complete list of heroes.
-
-### Edit a Hero
-1. Click on any hero card or list item.
-2. You'll be taken to the hero detail page.
-3. Edit the hero name in the input field.
-4. Click "Save" to persist changes.
-5. You will be redirected back after a successful save.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [Angular CLI](https://github.com/angular/angular-cli)
-- Inspired by the [Angular Tour of Heroes tutorial](https://angular.dev/tutorial/tour-of-heroes)
-- API powered by [json-server](https://github.com/typicode/json-server)
+- Sample data is seeded, so every range renders the same numbers on each load. Transaction times are relative to when the page loads.
+- Currency uses `en-IN` digit grouping to produce the lakh/crore style (for example `৳1,37,280`).
+- Only the BIN and the last four digits of a card are stored. `maskCard` shows the first four and last four digits and masks the rest for a 16-digit card (for example `5061 ******** 4821`); pass a different length for other card sizes.

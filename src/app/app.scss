@@ -1,10 +1,10 @@
 :host {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 main {
-    flex: 1;
-    padding-top: 60px; // Account for fixed navbar (approx height)
+  flex: 1;
+  padding-top: 68px; // fixed topbar height
 }

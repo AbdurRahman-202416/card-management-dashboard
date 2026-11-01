@@ -1,193 +1,351 @@
-<div class="dashboard">
-  <div class="dashboard__header">
-    <div class="dashboard__title">
-      <h1>Dashboard</h1>
-      <p>Dashboard - <span>Home</span></p>
-    </div>
-    <div class="dashboard__user">
-      <div class="avatar">L</div>
-      <div class="info">
-        <span>Last Log in</span>
-        <small>22-May-2022 10:10 PM</small>
-      </div>
-    </div>
-  </div>
-
-  <div class="dashboard__grid">
-    <!-- Active Cards -->
-    <div class="card card--active">
-      <div class="card__header" style="margin-bottom: 0;">
-        <div class="title">
-          <div class="card__number">{{ dashboardData.activeCards.total }}</div>
-          <p class="card__subtitle">Total active cards</p>
-        </div>
-      </div>
-      <div class="active-cards">
-        <div class="active-cards__chart">
-          <highcharts-chart [options]="activeCardsChartOptions"
-            style="width: 100%; height: 160px; display: block;"></highcharts-chart>
-        </div>
-        <div class="active-cards__legend">
-          <div class="item item--debit">
-            <span class="label">Debit</span>
-            <span class="value">{{ dashboardData.activeCards.debit | number }}</span>
-          </div>
-          <div class="item item--prepaid">
-            <span class="label">Prepaid</span>
-            <span class="value">{{ dashboardData.activeCards.prepaid | number }}</span>
-          </div>
-          <div class="item item--credit">
-            <span class="label">Credit</span>
-            <span class="value">{{ dashboardData.activeCards.credit | number }}</span>
-          </div>
-        </div>
-      </div>
+<section class="dash" [class.is-loading]="loading" [attr.aria-busy]="loading">
+  <header class="dash__head">
+    <div>
+      <h1>Card management overview</h1>
+      <p class="dash__sub">
+        Sample data · refreshed {{ updatedAt | date: 'h:mm a' }}
+      </p>
     </div>
 
-    <!-- Card Lifecycle -->
-    <div class="card card--lifecycle">
-      <div class="card__header">
-        <div class="title">
-          <h3>Card Lifecycle</h3>
-          <p>Summary of card issuance lifecycle</p>
-        </div>
+    <div class="dash__controls">
+      <div class="segmented" role="radiogroup" aria-label="Date range">
+        @for (r of ranges; track r) {
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="r === range"
+            [class.is-active]="r === range"
+            (click)="setRange(r)"
+          >
+            {{ r }}
+          </button>
+        }
       </div>
-      <div class="lifecycle-list">
-        <div class="item">
-          <span class="label">Issued this month</span>
-          <span class="value">{{ dashboardData.lifecycle.issued }}</span>
-        </div>
-        <div class="item">
-          <span class="label">Pending activations</span>
-          <span class="value">{{ dashboardData.lifecycle.pending }}</span>
-        </div>
-        <div class="item">
-          <span class="label">Expired</span>
-          <span class="value">{{ dashboardData.lifecycle.expired }}</span>
-        </div>
-      </div>
+      <button type="button" class="btn-icon" (click)="refresh()" aria-label="Refresh data">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  @if (!data) {
+    <div class="kpis">
+      @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+        <div class="kpi kpi--skeleton"></div>
+      }
+    </div>
+  } @else {
+    <div class="kpis">
+      @for (kpi of data.kpis; track trackKpi($index, kpi); let i = $index) {
+        <article class="kpi reveal" [style.--i]="i">
+          <div class="kpi__top">
+            <span class="kpi__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path [attr.d]="kpi.icon" /></svg>
+            </span>
+            <span class="kpi__label">{{ kpi.label }}</span>
+          </div>
+          <div
+            class="kpi__value"
+            [countUp]="kpi.value"
+            [prefix]="kpi.prefix ?? ''"
+            [suffix]="kpi.suffix ?? ''"
+            [decimals]="kpi.decimals"
+            [compact]="!!kpi.compact"
+          ></div>
+          <div class="kpi__foot">
+            <span class="delta" [class.delta--good]="isPositive(kpi)" [class.delta--bad]="!isPositive(kpi)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="kpi.delta >= 0 ? 'M7 17 17 7M8 7h9v9' : 'M7 7l10 10M17 8v9H8'" />
+              </svg>
+              {{ kpi.delta > 0 ? '+' : '' }}{{ kpi.delta }}%
+            </span>
+            <span class="kpi__vs">vs prev. period</span>
+          </div>
+          <svg class="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+            <path class="spark__area" [attr.d]="sparkArea(kpi.spark)" />
+            <path class="spark__line" [attr.d]="sparkLine(kpi.spark)" />
+          </svg>
+        </article>
+      }
     </div>
 
-    <!-- Card Portfolio Overview (Spans vertically) -->
-    <div class="card card--portfolio">
-      <div class="card__header">
-        <div class="title">
-          <h3>Card Portfolio Overview</h3>
-          <p>Issued cards by BIN and card type</p>
-        </div>
-        <div class="actions">
-          <div class="btn-toggle">
-            <button class="active">BIN View</button>
-            <button>Card Range View</button>
+    <div class="grid">
+      <article class="panel panel--volume reveal" style="--i: 6">
+        <header class="panel__head">
+          <div>
+            <h2>Transaction volume</h2>
+            <p>Daily value in lakh (৳), domestic vs international</p>
           </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <!-- Render Stacked Horizontal Bar Chart -->
-        <highcharts-chart [options]="portfolioChartOptions"
-          style="width: 100%; height: 350px; display: block;"></highcharts-chart>
-      </div>
-    </div>
+        </header>
+        <highcharts-chart [options]="volumeOptions" class="chart" />
+      </article>
 
-    <!-- Total transactions today -->
-    <div class="card card--transactions">
-      <div class="card__header" style="margin-bottom: 0;">
-        <div class="title">
-          <div class="card__number">{{ dashboardData.transactions.total }}</div>
-          <p class="card__subtitle">Total transactions today</p>
-        </div>
-      </div>
-      <div class="transactions-list">
-        <div class="item">
-          <span class="label">Domestic</span>
-          <div class="value-box">
-            <span class="val">{{ dashboardData.transactions.domestic }}</span>
-            <span class="trend trend--down">↘</span>
+      <article class="panel panel--mix reveal" style="--i: 7">
+        <header class="panel__head">
+          <div>
+            <h2>Active card mix</h2>
+            <p>By product type</p>
+          </div>
+        </header>
+        <div class="donut">
+          <highcharts-chart [options]="cardMixOptions" class="chart" />
+          <div class="donut__center">
+            <strong>{{ cardTotal | number }}</strong>
+            <span>cards</span>
           </div>
         </div>
-        <div class="item">
-          <span class="label">International</span>
-          <div class="value-box">
-            <span class="val">{{ dashboardData.transactions.international }}</span>
-            <span class="trend trend--up">↗</span>
-          </div>
-        </div>
-        <div class="item">
-          <span class="label">Total volume</span>
-          <div class="value-box">
-            <span class="val">{{ dashboardData.transactions.volume }}</span>
-            <span class="trend trend--up">↗</span>
-          </div>
-        </div>
-      </div>
-    </div>
+        <ul class="legend">
+          @for (item of data.cardMix; track item.name; let i = $index) {
+            <li>
+              <span class="swatch" [style.background]="cardMixColors[i]"></span>
+              <span class="legend__name">{{ item.name }}</span>
+              <span class="legend__value">{{ item.value | number }}</span>
+              <span class="legend__pct">{{ (item.value / cardTotal) * 100 | number: '1.0-0' }}%</span>
+            </li>
+          }
+        </ul>
+      </article>
 
-    <!-- Success rate today -->
-    <div class="card card--success">
-      <div class="card__header" style="margin-bottom: 0;">
-        <div class="title">
-          <div class="card__number">{{ dashboardData.successRate.rate }}</div>
-          <p class="card__subtitle">Success rate today</p>
-        </div>
-      </div>
-      <div class="active-cards">
-        <div class="active-cards__chart">
-          <highcharts-chart [options]="successRateChartOptions"
-            style="width: 100%; height: 160px; display: block;"></highcharts-chart>
-        </div>
-        <div class="active-cards__legend">
-          <div class="item item--approved">
-            <span class="label">Approved</span>
-            <span class="value">{{ dashboardData.successRate.approved }}</span>
+      <article class="panel panel--approval reveal" style="--i: 8">
+        <header class="panel__head">
+          <div>
+            <h2>Authorization outcomes</h2>
+            <p>Approved vs declined</p>
           </div>
-          <div class="item item--declined">
-            <span class="label">Declined</span>
-            <span class="value">{{ dashboardData.successRate.declined }}</span>
+        </header>
+        <div class="donut donut--sm">
+          <highcharts-chart [options]="approvalOptions" class="chart" />
+          <div class="donut__center">
+            <strong [countUp]="data.approval.rate" suffix="%" [decimals]="1"></strong>
+            <span>approved</span>
           </div>
         </div>
-      </div>
-    </div>
+        <h3 class="subhead">Top decline reasons</h3>
+        <ul class="bars">
+          @for (item of data.declineReasons; track item.reason; let i = $index) {
+            <li>
+              <div class="bars__row">
+                <span>{{ item.reason }}</span>
+                <b>{{ item.share }}%</b>
+              </div>
+              <div class="bars__track">
+                <div class="bars__fill" [style.width.%]="item.share * 2.2" [style.--d]="i"></div>
+              </div>
+            </li>
+          }
+        </ul>
+      </article>
 
-    <!-- Transaction Overview by Channel -->
-    <div class="card card--channel">
-      <div class="card__header">
-        <div class="title">
-          <h3>Transaction Overview by Channel</h3>
-        </div>
-        <div class="actions">
-          <span class="label-filter">Channel</span>
-          <select class="dropdown-sm">
-            <option>POS</option>
-            <option>ATM</option>
-          </select>
-          <div class="date-badge">
-            Last 7 Days 📅
+      <article class="panel panel--hours reveal" style="--i: 9">
+        <header class="panel__head">
+          <div>
+            <h2>Activity by hour</h2>
+            <p>Peak at <b>{{ peakHour }}</b> — plan capacity and fraud rules around it</p>
           </div>
-        </div>
-      </div>
-      <div class="chart-container chart-container--fixed-height">
-        <highcharts-chart [options]="transactionChartOptions"
-          style="width: 100%; height: 260px; display: block;"></highcharts-chart>
-      </div>
-    </div>
+        </header>
+        <highcharts-chart [options]="hoursOptions" class="chart" />
+        <dl class="stats">
+          @for (stat of hourStats; track stat.label) {
+            <div>
+              <dt>{{ stat.label }}</dt>
+              <dd>{{ stat.value }}</dd>
+              <small>{{ stat.hint }}</small>
+            </div>
+          }
+        </dl>
+      </article>
 
-    <!-- Top Merchant Categories (MCC) -->
-    <div class="card card--mcc">
-      <div class="card__header">
-        <div class="title">
-          <h3>Top Merchant Categories (MCC)</h3>
-          <p>Spending distribution by merchant category</p>
-        </div>
-        <div class="actions">
-          <div class="date-badge">
-            Last 7 Days 📅
+      <article class="panel panel--categories reveal" style="--i: 10">
+        <header class="panel__head">
+          <div>
+            <h2>Top merchant categories</h2>
+            <p>Share of total spend</p>
           </div>
+        </header>
+        <highcharts-chart [options]="categoriesOptions" class="chart" />
+      </article>
+
+      <article class="panel panel--bins reveal" style="--i: 11">
+        <header class="panel__head">
+          <div>
+            <h2>Portfolio by BIN</h2>
+            <p>Issued cards by BIN and card type</p>
+          </div>
+        </header>
+        <highcharts-chart [options]="binsOptions" class="chart" />
+      </article>
+
+      <article class="panel panel--lifecycle reveal" style="--i: 12">
+        <header class="panel__head">
+          <div>
+            <h2>Card lifecycle</h2>
+            <p>Issued this month to retained</p>
+          </div>
+        </header>
+        <ol class="funnel">
+          @for (step of data.lifecycle; track step.stage; let i = $index) {
+            <li>
+              <div class="funnel__row">
+                <span>{{ step.stage }}</span>
+                <b>{{ step.value | number }}</b>
+              </div>
+              <div class="funnel__track">
+                <div class="funnel__fill" [style.width.%]="funnelWidth(step.value)" [style.--d]="i"></div>
+              </div>
+              <small>{{ funnelWidth(step.value) }}% of issued</small>
+            </li>
+          }
+        </ol>
+      </article>
+
+      <article class="panel panel--alerts reveal" style="--i: 13">
+        <header class="panel__head">
+          <div>
+            <h2>Risk alerts</h2>
+            <p>Requires review</p>
+          </div>
+          <span class="count-pill">{{ alerts.length }}</span>
+        </header>
+        <ul class="alerts">
+          @for (alert of alerts; track alert.id) {
+            <li class="alert" [class]="'alert alert--' + alert.severity">
+              <span class="alert__tag">{{ alert.severity }}</span>
+              <div>
+                <strong>{{ alert.title }}</strong>
+                <p>{{ alert.detail }}</p>
+              </div>
+              <time>{{ alert.time }}</time>
+            </li>
+          }
+        </ul>
+      </article>
+
+      <article class="panel panel--txns reveal" style="--i: 14">
+        <header class="panel__head panel__head--wrap">
+          <div>
+            <h2>Recent transactions</h2>
+            <p>{{ transactions.length }} shown · select a row for details</p>
+          </div>
+          <div class="table-tools">
+            <div class="chips" role="group" aria-label="Filter by status">
+              @for (f of statusFilters; track f) {
+                <button
+                  type="button"
+                  class="chip"
+                  [class.is-active]="f === statusFilter"
+                  [attr.aria-pressed]="f === statusFilter"
+                  (click)="setStatusFilter(f)"
+                >
+                  {{ f }}
+                </button>
+              }
+            </div>
+            <label class="search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3" /></svg>
+              <input type="search" placeholder="Search merchant, ID, card or product" aria-label="Search transactions" (input)="onSearch($event)" />
+            </label>
+          </div>
+        </header>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Transaction</th>
+                <th scope="col">Merchant</th>
+                <th scope="col">Product type</th>
+                <th scope="col">Card</th>
+                <th scope="col">Channel</th>
+                <th scope="col" class="num">Amount</th>
+                <th scope="col">Status</th>
+                <th scope="col">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (txn of transactions; track txn.id) {
+                <tr class="row" (click)="openDetails(txn)">
+                  <td class="mono" data-label="Transaction">
+                    <button type="button" class="row__link" [attr.aria-label]="'View details for ' + txn.id">
+                      {{ txn.id }}
+                    </button>
+                  </td>
+                  <td class="cell-main" data-label="Merchant">
+                    <strong>{{ txn.merchant }}</strong>
+                    <small>{{ txn.category }}</small>
+                  </td>
+                  <td class="cell-main" data-label="Product type">
+                    <strong>{{ txn.product }}</strong>
+                    <small>{{ txn.cardType }}</small>
+                  </td>
+                  <td class="mono nowrap" data-label="Card">{{ maskCard(txn.bin, txn.card) }}</td>
+                  <td data-label="Channel">{{ txn.channel }}</td>
+                  <td class="num mono" data-label="Amount">{{ formatBdt(txn.amount) }}</td>
+                  <td data-label="Status"><span class="status" [class]="'status status--' + txn.status">{{ txn.status }}</span></td>
+                  <td class="muted" data-label="Time">{{ timeAgo(txn.postedAt) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="8" class="empty">No transactions match your filters.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      </div>
-      <div class="chart-container chart-container--fixed-height">
-        <highcharts-chart [options]="mccChartOptions"
-          style="width: 100%; height: 260px; display: block;"></highcharts-chart>
-      </div>
+      </article>
     </div>
-  </div>
-</div>
+  }
+
+  <dialog
+    #detailDialog
+    class="detail"
+    aria-labelledby="detail-title"
+    (click)="onDialogClick($event)"
+    (close)="selected = null"
+  >
+    @if (selected; as txn) {
+      <header class="detail__head">
+        <div>
+          <p class="detail__eyebrow mono">{{ txn.id }}</p>
+          <h2 id="detail-title">{{ txn.merchant }}</h2>
+          <p class="detail__sub">{{ txn.category }} · {{ txn.location }}</p>
+        </div>
+        <button type="button" class="detail__close" (click)="closeDetails()" aria-label="Close details">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+      </header>
+
+      <div class="detail__amount">
+        <strong>{{ formatBdt(txn.amount) }}</strong>
+        <span class="status" [class]="'status status--' + txn.status">{{ txn.status }}</span>
+      </div>
+
+      <dl class="detail__grid">
+        <div><dt>Date and time</dt><dd>{{ txn.postedAt | date: 'd MMM y, h:mm a' }}</dd></div>
+        <div><dt>Channel</dt><dd>{{ txn.channel }}</dd></div>
+        <div><dt>Product type</dt><dd>{{ txn.product }} {{ txn.cardType }}</dd></div>
+        <div><dt>Card</dt><dd class="mono">{{ maskCard(txn.bin, txn.card) }}</dd></div>
+        <div><dt>Reference (RRN)</dt><dd class="mono">{{ txn.reference }}</dd></div>
+        <div><dt>Authorization code</dt><dd class="mono">{{ txn.authCode }}</dd></div>
+        <div><dt>Response</dt><dd><span class="mono">{{ txn.responseCode }}</span> · {{ txn.responseMessage }}</dd></div>
+        <div><dt>Merchant fee (1.5%)</dt><dd class="mono">{{ txn.status === 'approved' ? formatBdt(txn.fee) : '—' }}</dd></div>
+        <div><dt>Net to merchant</dt><dd class="mono">{{ txn.status === 'approved' ? formatBdt(txn.amount - txn.fee) : '—' }}</dd></div>
+      </dl>
+
+      <ol class="timeline" aria-label="Transaction timeline">
+        <li class="is-done">
+          <span>Initiated</span>
+          <small>{{ txn.postedAt | date: 'h:mm:ss a' }}</small>
+        </li>
+        <li [class.is-done]="txn.status !== 'declined'" [class.is-fail]="txn.status === 'declined'">
+          <span>{{ txn.status === 'declined' ? 'Authorization declined' : 'Authorized' }}</span>
+          <small>{{ txn.responseMessage }}</small>
+        </li>
+        <li>
+          <span>{{ txn.status === 'declined' ? 'No settlement' : 'Settlement' }}</span>
+          <small>{{ settlementNote(txn) }}</small>
+        </li>
+      </ol>
+    }
+  </dialog>
+</section>
